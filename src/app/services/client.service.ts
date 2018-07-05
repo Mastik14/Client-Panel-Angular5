@@ -1,17 +1,21 @@
 import { Injectable } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
 import { Client } from '../models/Client';
 
 @Injectable()
 export class ClientService {
-  clients: FirebaseListObservable<any[]>;
-  client: FirebaseObjectObservable<any>;
+  clientsRef: AngularFireList<any>;
+  clients: Observable<any[]>;
+  client: Observable<any>;
 
-  constructor(
-    public af: AngularFireDatabase
-  ) {
-    this.clients = this.af.list('/clients') as FirebaseListObservable<Client[]>;
+  constructor(private db: AngularFireDatabase) {
+    this.clientsRef = this.db.list('clients');
+    this.clients = this.clientsRef.snapshotChanges().map( changes => {
+      return changes.map(c => ({
+        key: c.payload.key, ...c.payload.val()
+      }))
+    })
   }
 
   getClients() {
@@ -19,20 +23,20 @@ export class ClientService {
   }
 
   newClient(client: Client) {
-    this.clients.push(client);
+    this.clientsRef.push(client);
   }
 
   getClient(id: string) {
-    this.client = this.af.object('/clients/' + id) as FirebaseObjectObservable<Client>;
+    this.client = this.db.object('/clients/' + id).valueChanges();
     return this.client;
   }
 
   updateClient(id: string, client: Client) {
-    return this.clients.update(id, client);
+    return this.clientsRef.update(id, client);
   }
 
   deleteClient(id: string) {
-    return this.clients.remove(id);
+    return this.clientsRef.remove(id);
   }
 
 }
