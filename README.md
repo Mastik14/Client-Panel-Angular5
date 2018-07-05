@@ -1,5 +1,8 @@
 # Clientpanel
 
+live version
+https://clientpaneldev-6d2d8.firebaseapp.com
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.0.
 
 ## Development server
